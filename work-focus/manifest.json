@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Focus On Your Work",
+  "description": "Block distracting sites during work by redirecting them to a focus page. Toggle via the toolbar icon. Configurable URL patterns with wildcards or regex.",
+  "version": "1.0.0",
+  "action": {
+    "default_title": "Focus On Your Work: Toggle"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "scripts": ["background.js"]
+  },
+  "permissions": [
+    "storage",
+    "declarativeNetRequest"
+  ],
+  "optional_permissions": [
+    "webRequest",
+    "webRequestBlocking"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content-blocker.js"],
+      "run_at": "document_start",
+      "all_frames": false
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'unsafe-inline'; object-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; child-src https://www.youtube.com https://www.youtube-nocookie.com;"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["blocked.html"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "work-focus@example.com",
+      "strict_min_version": "109.0"
+    }
+  }
+}

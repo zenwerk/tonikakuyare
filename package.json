@@ -7,7 +7,11 @@
     "prettier": "npx prettier **/*.{md,html,json} -w",
     "lint": "eslint **/*.js",
     "lint:fix": "npm run lint -- --fix",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build:clean": "rm -rf dist",
+    "build:zip": "mkdir -p dist && cd work-focus && zip -r ../dist/work-focus.zip . -x '*.DS_Store'",
+    "build:xpi": "cp dist/work-focus.zip dist/work-focus.xpi",
+    "build": "npm run build:clean && npm run build:zip && npm run build:xpi"
   },
   "repository": {
     "type": "git",
