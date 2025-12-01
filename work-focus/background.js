@@ -62,9 +62,22 @@ function getBlockedPageUrl() {
 }
 
 async function setBadge(enabled) {
-  if (!browserApi.action || !browserApi.action.setBadgeText) return;
-  await browserApi.action.setBadgeText({ text: enabled ? 'ON' : 'OFF' });
-  await browserApi.action.setBadgeBackgroundColor?.({ color: enabled ? '#2e7d32' : '#9e9e9e' });
+  // Update toolbar icon instead of badge text.
+  if (!browserApi.action) return;
+  // Clear any existing badge text
+  try {
+    await browserApi.action.setBadgeText({ text: '' });
+  } catch {
+    /* empty */
+  }
+
+  const path = enabled ? 'icon_red.png' : 'icon.png';
+  try {
+    await browserApi.action.setIcon({ path });
+  } catch (e) {
+    // Fallback for older APIs if needed
+    try { await (browserApi.browserAction || browserApi.action).setIcon({ path }); } catch {}
+  }
 }
 
 // DNR support detection
