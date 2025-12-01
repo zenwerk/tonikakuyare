@@ -1,10 +1,17 @@
 {
   "manifest_version": 3,
-  "name": "Focus On Your Work",
+  "name": "とにかくやれ!!",
   "description": "Block distracting sites during work by redirecting them to a focus page. Toggle via the toolbar icon. Configurable URL patterns with wildcards or regex.",
   "version": "1.0.0",
+  "icons": {
+    "16": "icon.png",
+    "32": "icon.png",
+    "48": "icon.png",
+    "128": "icon.png"
+  },
   "action": {
-    "default_title": "Focus On Your Work: Toggle"
+    "default_title": "Focus On Your Work: Toggle",
+    "default_icon": "icon.png"
   },
   "background": {
     "service_worker": "background.js",
