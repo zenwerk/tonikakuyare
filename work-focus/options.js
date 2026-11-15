@@ -146,7 +146,7 @@ async function setEnabled(event) {
 async function reset() {
   if (
     !confirm(
-      '設定を初期状態に戻しますか？登録したドメインは初期値（x.com, posfile.com, togetter.com）に戻ります。'
+      '設定を初期状態に戻しますか？登録したドメインは初期値（x.com, posfie.com, togetter.com）に戻ります。'
     )
   ) {
     return;

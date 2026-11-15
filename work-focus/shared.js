@@ -7,7 +7,7 @@
 // patterns の初期値は、インストール直後と「設定をリセット」のあとに使われる
 const DEFAULT_SETTINGS = {
   enabled: true,
-  patterns: ['x.com', 'posfile.com', 'togetter.com']
+  patterns: ['x.com', 'posfie.com', 'togetter.com']
 };
 
 function getBrowserApi() {
