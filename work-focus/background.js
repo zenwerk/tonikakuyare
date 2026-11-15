@@ -2,7 +2,7 @@
 // アイコンのクリックで ON/OFF を切り替え、設定に合わせて
 // declarativeNetRequest の動的ルールとツールバーアイコンを更新する。
 
-/* global getBrowserApi, getSettings, compilePatterns */
+/* global getBrowserApi, getSettings, getStats, compilePatterns, isBlockedUrl */
 
 // Chrome は service worker として読み込むため shared.js をここで取り込む。
 // Firefox は manifest の background.scripts で shared.js を先に読み込む。
@@ -10,17 +10,28 @@ if (typeof importScripts === 'function') importScripts('shared.js');
 
 const browserApi = getBrowserApi();
 
+const MAX_HISTORY = 1000;
+
 function updateIcon(enabled) {
   const path = enabled ? 'icon_red.png' : 'icon.png';
   return browserApi.action.setIcon({ path }).catch(() => {});
 }
 
 function buildRules(patterns) {
+  // regexSubstitution の \0 は「一致した部分」なので、URL 全体に一致するよう
+  // パターンを包み、元の URL をブロックページのフラグメントとして渡す
+  const blockedPage = browserApi.runtime.getURL('blocked.html');
   return compilePatterns(patterns).map((regex, i) => ({
     id: 1000 + i,
     priority: 1,
-    action: { type: 'redirect', redirect: { extensionPath: '/blocked.html' } },
-    condition: { regexFilter: regex.source, resourceTypes: ['main_frame'] }
+    action: {
+      type: 'redirect',
+      redirect: { regexSubstitution: `${blockedPage}#\\0` }
+    },
+    condition: {
+      regexFilter: `^.*(?:${regex.source}).*$`,
+      resourceTypes: ['main_frame']
+    }
   }));
 }
 
@@ -41,11 +52,37 @@ async function refresh() {
   await Promise.all([updateIcon(enabled), updateRules(enabled, patterns)]);
 }
 
-// 設定変更が続いても getDynamicRules と updateDynamicRules が交互に走って
-// ルール ID が衝突しないよう、refresh を 1 つずつ順番に実行する
-let refreshing = Promise.resolve();
+async function recordBlock(url) {
+  let parsed;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return;
+  }
+  // ブロックページは web からも開けるので、ブロック対象の URL だけを記録する
+  const { patterns } = await getSettings();
+  if (!/^https?:$/.test(parsed.protocol) || !isBlockedUrl(url, patterns)) {
+    return;
+  }
+  const stats = await getStats();
+  const time = Date.now();
+  const domain = parsed.hostname.replace(/^www\./, '');
+  stats.history.push({ time, url });
+  stats.history.splice(0, stats.history.length - MAX_HISTORY);
+  stats.domains[domain] = (stats.domains[domain] ?? 0) + 1;
+  stats.hours[new Date(time).getHours()] += 1;
+  await browserApi.storage.local.set({ stats });
+}
+
+// ルール更新（getDynamicRules → updateDynamicRules）と統計の読み書きが
+// 並行して走って結果を上書きし合わないよう、1 つずつ順番に実行する
+let queue = Promise.resolve();
+function enqueue(task) {
+  queue = queue.then(task).catch(console.error);
+}
+
 function scheduleRefresh() {
-  refreshing = refreshing.then(refresh).catch(console.error);
+  enqueue(refresh);
 }
 
 // 反映は storage.onChanged に任せ、ここでは保存だけ行う
@@ -54,8 +91,19 @@ browserApi.action.onClicked.addListener(async () => {
   await browserApi.storage.local.set({ enabled: !enabled });
 });
 
-browserApi.storage.onChanged.addListener((_changes, area) => {
-  if (area === 'local') scheduleRefresh();
+// 統計の書き込みではルールを作り直さない
+browserApi.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && ('enabled' in changes || 'patterns' in changes)) {
+    scheduleRefresh();
+  }
+});
+
+// ブロックページとオプションページからの統計の記録・リセット
+browserApi.runtime.onMessage.addListener((message) => {
+  if (message?.type === 'recordBlock') enqueue(() => recordBlock(message.url));
+  if (message?.type === 'resetStats') {
+    enqueue(() => browserApi.storage.local.remove('stats'));
+  }
 });
 
 browserApi.runtime.onInstalled.addListener(scheduleRefresh);

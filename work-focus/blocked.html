@@ -10,7 +10,12 @@
     .card { max-width: 720px; padding: 24px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.1); background: Canvas; color: CanvasText; border: 1px solid rgba(0,0,0,.08); }
     h1 { margin: 0 0 12px; font-size: 24px; }
     p { margin: 6px 0; }
-    .url { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; color: #1565c0; }
+    .origin { margin-top: 16px; }
+    .origin-label { font-size: 12px; opacity: .7; }
+    .origin-link { display: block; color: #1565c0; text-decoration: none; }
+    .origin-link:hover { text-decoration: underline; }
+    .origin-title { display: block; font-weight: 600; }
+    .url { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; overflow-wrap: anywhere; }
     .player { margin-top: 16px; }
     .player video { width: 100%; height: auto; max-height: 60vh; border-radius: 8px; display: block; }
   </style>
@@ -19,14 +24,21 @@
   <div class="card">
     <h1>今は集中する時間です</h1>
     <p>指定されたサイトへのアクセスはブロックされています。</p>
-    <p id="url" class="url"></p>
     <div class="player" aria-label="トニカクやれ動画プレイヤー">
       <video controls autoplay loop muted playsinline preload="metadata">
         <source src="tonikakuyare.webm" type="video/webm">
         お使いのブラウザは video タグに対応していません。
       </video>
     </div>
+    <div id="origin" class="origin" hidden>
+      <p class="origin-label">ブロックしたページ</p>
+      <a id="originLink" class="origin-link" rel="noreferrer">
+        <span id="originTitle" class="origin-title"></span>
+        <span id="originUrl" class="url"></span>
+      </a>
+    </div>
   </div>
+  <script src="shared.js"></script>
   <script src="blocked.js"></script>
 </body>
 </html>

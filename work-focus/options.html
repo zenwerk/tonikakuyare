@@ -8,13 +8,26 @@
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; margin: 24px; }
     h1 { font-size: 20px; margin: 0 0 12px; }
     label { display: block; margin: 12px 0 6px; font-weight: 600; }
-    textarea { width: 100%; height: 180px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .add-form { display: flex; gap: 8px; max-width: 640px; }
+    .add-form input { flex: 1; }
+    .pattern-list { max-width: 640px; margin: 12px 0 0; padding: 0; list-style: none; }
+    .pattern-list li { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid #e0e0e0; }
+    .pattern-text { flex: 1; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; overflow-wrap: anywhere; }
+    .pattern-list input { flex: 1; }
+    .pattern-empty { color: #666; font-size: 12px; }
     .row { margin: 12px 0; }
     .hint { color: #666; font-size: 12px; }
     .actions { margin-top: 16px; display: flex; gap: 8px; align-items: center; }
     .status { font-size: 12px; color: #2e7d32; }
+    .status.error { color: #d32f2f; }
     input[type="text"] { width: 100%; padding: 6px 8px; }
     .footer { margin-top: 24px; color: #777; font-size: 12px; }
+    h2 { font-size: 16px; margin: 32px 0 8px; }
+    .ranking { max-width: 640px; margin: 0; padding: 0; list-style: none; }
+    .ranking li { display: grid; grid-template-columns: 2em minmax(6em, 14em) 1fr 4em; gap: 8px; align-items: center; margin: 4px 0; }
+    .ranking-rank, .ranking-count { text-align: right; font-variant-numeric: tabular-nums; }
+    .ranking-domain { overflow-wrap: anywhere; }
+    .ranking-bar { display: block; height: 10px; background: #e57373; border-radius: 4px; }
   </style>
   <script defer src="shared.js"></script>
   <script defer src="options.js"></script>
@@ -25,24 +38,32 @@
     <label><input type="checkbox" id="enabled"> 拡張機能を有効にする</label>
   </div>
   <div class="row">
-    <label for="patterns">ブロックするURLパターン（1行に1つ）</label>
-    <textarea id="patterns" placeholder="例:
-*://*.twitter.com/*
-*://*.youtube.com/*
-*/chatgpt/*
-/^https?:\\/\\/(?:www\\.)?news\\.example\\.com\\/.*$/"></textarea>
-    <div class="hint">ワイルドカード: * と ? が使用できます。<br>
-      正規表現を使用する場合は /regex/ の形式で指定してください（フラグ無し）。</div>
+    <label for="newPattern">ブロックするドメイン</label>
+    <form id="addForm" class="add-form">
+      <input id="newPattern" type="text" placeholder="例: youtube.com" autocomplete="off">
+      <button type="submit">追加</button>
+    </form>
+    <div class="hint">
+      http / https とサブドメイン（www. など）は自動で対象になります。<br>
+      x.com/home のようにパスを付けると、そのパスで始まるページだけをブロックします。<br>
+      * は任意の文字列、? は任意の 1 文字に一致します。/正規表現/ の形式で書くと URL 全体に対する正規表現になります。
+    </div>
+    <ul id="patternList" class="pattern-list"></ul>
   </div>
   <div class="row">
     <label for="testUrl">テスト用URL</label>
-    <input id="testUrl" type="text" placeholder="https://example.com/...">
+    <input id="testUrl" type="text" placeholder="例: www.youtube.com/watch?v=...">
     <div id="testResult" class="hint"></div>
   </div>
   <div class="actions">
-    <button id="saveBtn">保存</button>
-    <button id="resetBtn">リセット</button>
+    <button id="resetBtn">設定をリセット</button>
     <span id="status" class="status"></span>
+  </div>
+  <h2>ブロックしたドメイン</h2>
+  <p id="statsTotal" class="hint"></p>
+  <ol id="ranking" class="ranking"></ol>
+  <div class="actions">
+    <button id="resetStatsBtn">統計をリセット</button>
   </div>
   <div class="footer">ツールバーアイコンをクリックすると有効/無効を切り替えできます。</div>
 </body>
