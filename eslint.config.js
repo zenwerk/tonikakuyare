@@ -28,6 +28,14 @@ module.exports = [
     }
   },
   {
+    // ビルド用スクリプトは Node.js（CommonJS）で動かす
+    files: ['scripts/**/*.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: globals.node
+    }
+  },
+  {
     // Ignores must be in a separate block to apply globally:
     // https://eslint.org/docs/latest/use/configure/configuration-files#globally-ignoring-files-with-ignores
     ignores: ['eslint.config.js', '**/dist/**/*']

@@ -2,7 +2,7 @@
 // アイコンのクリックで ON/OFF を切り替え、設定に合わせて
 // declarativeNetRequest の動的ルールとツールバーアイコンを更新する。
 
-/* global getBrowserApi, getSettings, getStats, compilePatterns, isBlockedUrl */
+/* global getBrowserApi, getSettings, getStats, hasHostPermission, compilePatterns, isBlockedUrl */
 
 // Chrome は service worker として読み込むため shared.js をここで取り込む。
 // Firefox は manifest の background.scripts で shared.js を先に読み込む。
@@ -13,7 +13,8 @@ const browserApi = getBrowserApi();
 const MAX_HISTORY = 1000;
 
 function updateIcon(enabled) {
-  const path = enabled ? 'icon_red.png' : 'icon.png';
+  const name = enabled ? 'icon-red' : 'icon';
+  const path = { 16: `icons/${name}-16.png`, 32: `icons/${name}-32.png` };
   return browserApi.action.setIcon({ path }).catch(() => {});
 }
 
@@ -36,9 +37,7 @@ function buildRules(patterns) {
 }
 
 async function updateRules(enabled, patterns) {
-  // DNR が無い環境（Firefox 113 未満）では content-blocker.js がブロックを担う
   const dnr = browserApi.declarativeNetRequest;
-  if (!dnr) return;
   const existing = await dnr.getDynamicRules();
   // 削除と追加を 1 回の呼び出しにまとめ、ルールが空になる瞬間を作らない
   await dnr.updateDynamicRules({
@@ -106,5 +105,13 @@ browserApi.runtime.onMessage.addListener((message) => {
   }
 });
 
-browserApi.runtime.onInstalled.addListener(scheduleRefresh);
+// サイトへのアクセス権限が無いとブロックが動かないので、オプションページで許可を求める
+async function checkHostPermission() {
+  if (!(await hasHostPermission())) await browserApi.runtime.openOptionsPage();
+}
+
+browserApi.runtime.onInstalled.addListener(() => {
+  scheduleRefresh();
+  checkHostPermission().catch(console.error);
+});
 browserApi.runtime.onStartup.addListener(scheduleRefresh);

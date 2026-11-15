@@ -23,6 +23,8 @@
     input[type="text"] { width: 100%; padding: 6px 8px; }
     .footer { margin-top: 24px; color: #777; font-size: 12px; }
     h2 { font-size: 16px; margin: 32px 0 8px; }
+    .warning { max-width: 640px; margin: 0 0 16px; padding: 12px 16px; border: 1px solid #f5c2c0; border-radius: 8px; background: #fdecea; color: #b71c1c; }
+    .warning p { margin: 0 0 8px; }
     .ranking { max-width: 640px; margin: 0; padding: 0; list-style: none; }
     .ranking li { display: grid; grid-template-columns: 2em minmax(6em, 14em) 1fr 4em; gap: 8px; align-items: center; margin: 4px 0; }
     .ranking-rank, .ranking-count { text-align: right; font-variant-numeric: tabular-nums; }
@@ -34,6 +36,10 @@
   </head>
 <body>
   <h1>Focus On Your Work 設定</h1>
+  <div id="permissionWarning" class="warning" hidden>
+    <p>サイトへのアクセスが許可されていないため、ブロックが動作しません。</p>
+    <button id="grantPermissionBtn" type="button">すべてのサイトへのアクセスを許可</button>
+  </div>
   <div class="row">
     <label><input type="checkbox" id="enabled"> 拡張機能を有効にする</label>
   </div>

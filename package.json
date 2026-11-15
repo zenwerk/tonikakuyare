@@ -7,10 +7,7 @@
     "prettier": "prettier **/*.{md,html,json} -w",
     "lint": "eslint .",
     "lint:fix": "npm run lint -- --fix",
-    "build:clean": "rm -rf dist",
-    "build:zip": "mkdir -p dist && cd work-focus && zip -r ../dist/work-focus.zip . -x '*.DS_Store'",
-    "build:xpi": "cp dist/work-focus.zip dist/work-focus.xpi",
-    "build": "npm run build:clean && npm run build:zip && npm run build:xpi"
+    "build": "node scripts/build.js"
   },
   "license": "Apache 2.0",
   "devDependencies": {

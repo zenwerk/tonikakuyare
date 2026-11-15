@@ -1,4 +1,4 @@
-/* global getBrowserApi, getSettings, getStats, normalizePattern, compilePatterns, isBlockedUrl */
+/* global getBrowserApi, getSettings, getStats, hasHostPermission, requestHostPermission, normalizePattern, compilePatterns, isBlockedUrl */
 
 const browserApi = getBrowserApi();
 
@@ -222,7 +222,27 @@ function resetStats() {
   browserApi.runtime.sendMessage({ type: 'resetStats' }).catch(() => {});
 }
 
+async function updatePermissionWarning() {
+  document.getElementById('permissionWarning').hidden =
+    await hasHostPermission();
+}
+
+function grantPermission() {
+  // ユーザーのクリックの中で直接 request する必要があるので await を挟まない
+  requestHostPermission()
+    .then(updatePermissionWarning)
+    .catch(() => setStatus('権限を許可できませんでした', true));
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
+  updatePermissionWarning();
+  document
+    .getElementById('grantPermissionBtn')
+    .addEventListener('click', grantPermission);
+  // 拡張メニューなどで権限が変わったときも表示を合わせる
+  browserApi.permissions.onAdded.addListener(updatePermissionWarning);
+  browserApi.permissions.onRemoved.addListener(updatePermissionWarning);
+
   await init();
   renderStats();
   document.getElementById('addForm').addEventListener('submit', addPattern);

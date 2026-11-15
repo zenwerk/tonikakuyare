@@ -3,7 +3,7 @@
 ## 動作環境
 
 - Google Chrome 109+（または Chromium 系ブラウザの同等バージョン）
-- Mozilla Firefox 109+（Manifest V3 対応版）
+- Mozilla Firefox 140+（Firefox for Android は 142+）
 
 ## インストール（開発・検証目的）
 
@@ -40,7 +40,7 @@ npm run prettier    # Markdown/HTML/JSON の整形
 
 ### 配布用パッケージの作成（ZIP/XPI）
 
-拡張を配布しやすいように、`work-focus` ディレクトリを ZIP 化するスクリプトを用意しています。
+拡張を配布しやすいように、`work-focus` ディレクトリを ZIP 化するスクリプト（`scripts/build.js`）を用意しています。
 
 手順:
 
@@ -51,12 +51,14 @@ npm run build
 出力:
 
 - `dist/work-focus.zip` — Chrome ウェブストア提出や手動配布に利用できます
-- `dist/work-focus.xpi` — Firefox 向けの拡張パッケージ（実体は ZIP と同一。アドオン配布時に便利）
+- `dist/work-focus.xpi` — Firefox Add-ons（AMO）提出用
 
 注意:
 
 - macOS/Linux の標準 `zip` コマンドを使用します。Windows の場合は Git Bash などの環境で実行してください。
 - 生成物には `work-focus` ディレクトリ直下のファイルがすべて含まれます（`.DS_Store` は除外）。
+- `work-focus/manifest.json` には Chrome 用の `background.service_worker` と Firefox 用の `background.scripts` の両方を書いていますが、パッケージではそれぞれのブラウザが使わない方を取り除きます（Chrome 用は `browser_specific_settings` も除きます）。
+- アイコン（`work-focus/icons/`）は `assets/` の 256px の元画像から作っています。作り直すときは `sips -z 16 16 assets/icon.png --out work-focus/icons/icon-16.png` のように各サイズを書き出してください。
 
 ## ライセンス
 

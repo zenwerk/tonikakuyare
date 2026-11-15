@@ -2,7 +2,7 @@
 // バンドラも ES modules も使わず、各スクリプトの前に通常のスクリプトとして読み込む。
 // どのコンテキスト（Firefox のコンテンツスクリプトを含む）でもグローバルから見えるよう、
 // 外部に公開するのは関数宣言だけにしている。
-/* exported getBrowserApi, getSettings, getStats, normalizePattern, compilePatterns, isBlockedUrl */
+/* exported getBrowserApi, getSettings, getStats, hasHostPermission, requestHostPermission, normalizePattern, compilePatterns, isBlockedUrl */
 
 // patterns の初期値は、インストール直後と「設定をリセット」のあとに使われる
 const DEFAULT_SETTINGS = {
@@ -17,6 +17,19 @@ function getBrowserApi() {
 // 未保存のキーは DEFAULT_SETTINGS の値で補われる
 function getSettings() {
   return getBrowserApi().storage.local.get(DEFAULT_SETTINGS);
+}
+
+// DNR のリダイレクトと content script には、すべてのサイトへのアクセス権限が要る。
+// Firefox の MV3 ではこの権限はユーザーが外せる（拡張メニューの「クリック時のみ」など）。
+const ALL_SITES = { origins: ['<all_urls>'] };
+
+function hasHostPermission() {
+  return getBrowserApi().permissions.contains(ALL_SITES);
+}
+
+// ユーザー操作（クリックなど）の処理の中から、await を挟まずに呼ぶこと
+function requestHostPermission() {
+  return getBrowserApi().permissions.request(ALL_SITES);
 }
 
 // ブロックの記録。history は直近の履歴（{ time, url }）、
