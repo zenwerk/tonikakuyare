@@ -15,15 +15,11 @@
   },
   "background": {
     "service_worker": "background.js",
-    "scripts": ["background.js"]
+    "scripts": ["shared.js", "background.js"]
   },
   "permissions": [
     "storage",
     "declarativeNetRequest"
-  ],
-  "optional_permissions": [
-    "webRequest",
-    "webRequestBlocking"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -35,14 +31,10 @@
   "content_scripts": [
     {
       "matches": ["http://*/*", "https://*/*"],
-      "js": ["content-blocker.js"],
-      "run_at": "document_start",
-      "all_frames": false
+      "js": ["shared.js", "content-blocker.js"],
+      "run_at": "document_start"
     }
   ],
-  "content_security_policy": {
-    "extension_pages": "script-src 'self' 'unsafe-inline'; object-src 'self'; frame-src https://www.youtube.com https://www.youtube-nocookie.com; child-src https://www.youtube.com https://www.youtube-nocookie.com;"
-  },
   "web_accessible_resources": [
     {
       "resources": ["blocked.html"],

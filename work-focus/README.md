@@ -23,9 +23,10 @@
 
 ## 技術メモ
 
-- Chrome では declarativeNetRequest を用いた動的ルールでリダイレクトします。Firefox など DNR が使えない環境では webRequest を用いたブロック/リダイレクトにフォールバックします。
-- さらに、ネットワークフックが効かないケースに備えて content script による早期リダイレクトも用意しています（document_start）。
-- アイコンのクリックで `enabled` をトグル、バッジに ON/OFF を表示します。
+- declarativeNetRequest の動的ルールでリダイレクトします。
+- DNR が使えない環境やルールの適用前に備えて、content script による早期リダイレクト（document_start）も用意しています。
+- パターンの解釈と設定の読み込みは `shared.js` にまとめ、background・content script・オプションページで共有しています。
+- アイコンのクリックで `enabled` をトグルし、ON のときはツールバーアイコンが赤（`icon_red.png`）に切り替わります。
 
 ## 配布用パッケージの作成
 
